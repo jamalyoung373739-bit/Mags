@@ -1,5 +1,13 @@
 loadstring([[
 
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local TweenService = game:GetService("TweenService")
+local lp = Players.LocalPlayer
+local playerGui = lp:WaitForChild("PlayerGui")
+
 -- SETTINGS
 local ballName = "Football"
 local magnetRange = 35
@@ -8,14 +16,6 @@ local pullVectorEnabled = false
 local pullVectorStrength = 0.2
 local magnetEnabled = true
 local autoTuckEnabled = false
-
--- SERVICES
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local lp = Players.LocalPlayer
-local playerGui = lp:WaitForChild("PlayerGui")
 
 -- COLOR THEMES
 local colorThemes = {
@@ -27,6 +27,11 @@ local colorThemes = {
 }
 local currentTheme = 2
 local currentMenuColor = 1
+
+-- Remove old GUI
+if playerGui:FindFirstChild("TacariGUI") then
+    playerGui.TacariGUI:Destroy()
+end
 
 -- GUI
 local gui = Instance.new("ScreenGui")
@@ -94,7 +99,7 @@ miscContent.BackgroundTransparency = 1
 miscContent.Visible = false
 miscContent.Parent = frame
 
--- FUNCTION TO CREATE SLIDERS
+-- SLIDER FUNCTION
 local function createSlider(parent,y,text,value,max,callback)
     local lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(1,0,0,25)
@@ -145,17 +150,7 @@ local function createSlider(parent,y,text,value,max,callback)
     end)
 end
 
--- MAIN TAB SLIDERS AND BUTTONS
-createSlider(mainContent,0,"Magnet Range",magnetRange,100,function(v) magnetRange=v end)
-createSlider(mainContent,60,"WalkSpeed",walkSpeed,100,function(v)
-    walkSpeed=v
-    if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-        lp.Character.Humanoid.WalkSpeed=v
-    end
-end)
-createSlider(mainContent,120,"Pull Vector Strength",pullVectorStrength*100,100,function(v) pullVectorStrength=v/100 end)
-
--- TOGGLE BUTTON FUNCTION
+-- TOGGLE FUNCTION
 local function createToggle(parent,y,text,default,callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1,0,0,30)
@@ -179,13 +174,22 @@ local function createToggle(parent,y,text,default,callback)
     end)
 end
 
--- AutoTuck toggle
+-- MAIN SLIDERS
+createSlider(mainContent,0,"Magnet Range",magnetRange,100,function(v) magnetRange=v end)
+createSlider(mainContent,60,"WalkSpeed",walkSpeed,100,function(v)
+    walkSpeed=v
+    if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+        lp.Character.Humanoid.WalkSpeed=v
+    end
+end)
+createSlider(mainContent,120,"Pull Vector Strength",pullVectorStrength*100,100,function(v) pullVectorStrength=v/100 end)
+
+-- MAIN TOGGLES
 createToggle(mainContent,180,"Auto Tuck",autoTuckEnabled,function(state) autoTuckEnabled=state end)
--- Pull Vector toggle
 createToggle(mainContent,220,"Pull Vector",pullVectorEnabled,function(state) pullVectorEnabled=state end)
--- Magnet toggle
 createToggle(mainContent,260,"Magnet",magnetEnabled,function(state) magnetEnabled=state end)
--- Rejoin button
+
+-- REJOIN BUTTON
 local rejoinBtn = Instance.new("TextButton")
 rejoinBtn.Size = UDim2.new(1,0,0,30)
 rejoinBtn.Position = UDim2.new(0,0,0,300)
@@ -216,7 +220,7 @@ miscTab.MouseButton1Click:Connect(function()
     miscTab.BackgroundColor3=colorThemes[currentTheme].primary
 end)
 
--- DRAGGING
+-- DRAGGING GUI
 local dragStart
 local startPos
 title.InputBegan:Connect(function(input)
@@ -231,16 +235,8 @@ title.InputChanged:Connect(function(input)
         frame.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
     end
 end)
-title.InputEnded:Connect(function(input) if input.UserInputType==Enum.UserInputType.MouseButton1 then dragStart=nil end end)
-
--- GUI TOGGLE
-local guiVisible=false
-UserInputService.InputBegan:Connect(function(input,processed)
-    if processed then return end
-    if input.KeyCode==Enum.KeyCode.RightControl then
-        guiVisible=not guiVisible
-        frame.Visible=guiVisible
-    end
+title.InputEnded:Connect(function(input)
+    if input.UserInputType==Enum.UserInputType.MouseButton1 then dragStart=nil end
 end)
 
 -- MAGNET & PULL VECTOR
@@ -258,7 +254,7 @@ UserInputService.InputBegan:Connect(function(input,processed)
                 if magnetEnabled and dist<=magnetRange then
                     obj.CFrame=CFrame.new(hand.Position)
                 elseif pullVectorEnabled and dist<=magnetRange then
-                    game:GetService("TweenService"):Create(obj,TweenInfo.new(pullVectorStrength,Enum.EasingStyle.Linear),{CFrame=CFrame.new(hand.Position)}):Play()
+                    TweenService:Create(obj,TweenInfo.new(pullVectorStrength,Enum.EasingStyle.Linear),{CFrame=CFrame.new(hand.Position)}):Play()
                 end
             end
         end
@@ -266,8 +262,7 @@ UserInputService.InputBegan:Connect(function(input,processed)
 end)
 
 -- FORCEFIELD
-local function createForcefield()
-    local char = lp.Character or lp.CharacterAdded:Wait()
+local function createForcefield(char)
     local root = char:WaitForChild("HumanoidRootPart")
     local ff = Instance.new("Part")
     ff.Name="BlueForcefield"
@@ -280,15 +275,19 @@ local function createForcefield()
     ff.CastShadow=false
     ff.Size=Vector3.new(magnetRange*2,magnetRange*2,magnetRange*2)
     ff.Parent=workspace
-    RunService.Heartbeat:Connect(function()
+    local conn
+    conn = RunService.Heartbeat:Connect(function()
         if root and root.Parent then
             ff.Position=root.Position
             ff.Size=Vector3.new(magnetRange*2,magnetRange*2,magnetRange*2)
-        else ff:Destroy() end
+        else
+            ff:Destroy()
+            conn:Disconnect()
+        end
     end)
 end
+if lp.Character then createForcefield(lp.Character) end
 lp.CharacterAdded:Connect(createForcefield)
-if lp.Character then createForcefield() end
 
 -- AUTO TUCK
 local function setupTool(tool)
