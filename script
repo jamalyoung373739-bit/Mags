@@ -1,5 +1,4 @@
 loadstring([[
-
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -19,11 +18,11 @@ local autoTuckEnabled = false
 
 -- COLOR THEMES
 local colorThemes = {
-    {name="Black", primary=Color3.fromRGB(0,0,0), secondary=Color3.fromRGB(30,30,30)},
-    {name="Blue", primary=Color3.fromRGB(0,162,255), secondary=Color3.fromRGB(30,30,30)},
-    {name="Red", primary=Color3.fromRGB(255,50,50), secondary=Color3.fromRGB(30,30,30)},
-    {name="Green", primary=Color3.fromRGB(50,255,50), secondary=Color3.fromRGB(30,30,30)},
-    {name="Yellow", primary=Color3.fromRGB(255,255,50), secondary=Color3.fromRGB(30,30,30)}
+    {name="Black", primary=Color3.fromRGB(25,25,25), secondary=Color3.fromRGB(45,45,45)},
+    {name="Blue", primary=Color3.fromRGB(0,162,255), secondary=Color3.fromRGB(40,40,40)},
+    {name="Red", primary=Color3.fromRGB(255,50,50), secondary=Color3.fromRGB(40,40,40)},
+    {name="Green", primary=Color3.fromRGB(50,255,50), secondary=Color3.fromRGB(40,40,40)},
+    {name="Yellow", primary=Color3.fromRGB(255,255,50), secondary=Color3.fromRGB(40,40,40)}
 }
 local currentTheme = 2
 local currentMenuColor = 1
@@ -39,22 +38,21 @@ gui.Name = "TacariGUI"
 gui.Parent = playerGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0,450,0,350)
-frame.Position = UDim2.new(0.5,-225,0.5,-175)
+frame.Size = UDim2.new(0,460,0,370)
+frame.Position = UDim2.new(0.5,-230,0.5,-185)
 frame.BackgroundColor3 = colorThemes[currentMenuColor].secondary
 frame.BorderSizePixel = 0
 frame.Parent = gui
 
 local uicorner = Instance.new("UICorner")
-uicorner.CornerRadius = UDim.new(0,12)
+uicorner.CornerRadius = UDim.new(0,14)
 uicorner.Parent = frame
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1,0,0,30)
-title.Position = UDim2.new(0,0,0,0)
+title.Size = UDim2.new(1,0,0,35)
 title.BackgroundTransparency = 1
 title.Text = "Tacari | Elijah"
-title.Font = Enum.Font.SourceSansBold
+title.Font = Enum.Font.GothamBold
 title.TextSize = 20
 title.TextColor3 = Color3.fromRGB(255,255,255)
 title.TextScaled = true
@@ -67,23 +65,23 @@ tabFrame.Position = UDim2.new(0,0,0,40)
 tabFrame.BackgroundTransparency = 1
 tabFrame.Parent = frame
 
-local mainTab = Instance.new("TextButton")
-mainTab.Size = UDim2.new(0,80,1,0)
-mainTab.Position = UDim2.new(0,0,0,0)
-mainTab.BackgroundColor3 = colorThemes[currentTheme].primary
-mainTab.Text = "Main"
-mainTab.Font = Enum.Font.SourceSansBold
-mainTab.TextColor3 = Color3.new(1,1,1)
-mainTab.Parent = tabFrame
+local function makeTab(name,pos,isActive)
+    local t = Instance.new("TextButton")
+    t.Size = UDim2.new(0,90,1,0)
+    t.Position = UDim2.new(0,pos,0,0)
+    t.BackgroundColor3 = isActive and colorThemes[currentTheme].primary or Color3.fromRGB(70,70,70)
+    t.Text = name
+    t.Font = Enum.Font.GothamBold
+    t.TextSize = 14
+    t.TextColor3 = Color3.new(1,1,1)
+    local c = Instance.new("UICorner",t)
+    c.CornerRadius = UDim.new(0,8)
+    t.Parent = tabFrame
+    return t
+end
 
-local miscTab = Instance.new("TextButton")
-miscTab.Size = UDim2.new(0,80,1,0)
-miscTab.Position = UDim2.new(0,90,0,0)
-miscTab.BackgroundColor3 = Color3.fromRGB(60,60,60)
-miscTab.Text = "Misc"
-miscTab.Font = Enum.Font.SourceSansBold
-miscTab.TextColor3 = Color3.new(1,1,1)
-miscTab.Parent = tabFrame
+local mainTab = makeTab("Main",0,true)
+local miscTab = makeTab("Misc",100,false)
 
 local mainContent = Instance.new("Frame")
 mainContent.Size = UDim2.new(1,-20,1,-80)
@@ -102,38 +100,33 @@ miscContent.Parent = frame
 -- SLIDER FUNCTION
 local function createSlider(parent,y,text,value,max,callback)
     local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1,0,0,25)
+    lbl.Size = UDim2.new(1,0,0,20)
     lbl.Position = UDim2.new(0,0,0,y)
     lbl.BackgroundTransparency = 1
     lbl.Text = text.." "..value
-    lbl.TextColor3 = Color3.fromRGB(255,255,255)
-    lbl.Font = Enum.Font.SourceSansBold
+    lbl.TextColor3 = Color3.fromRGB(230,230,230)
+    lbl.Font = Enum.Font.GothamBold
     lbl.TextSize = 14
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.Parent = parent
 
     local back = Instance.new("Frame")
-    back.Size = UDim2.new(1,0,0,8)
-    back.Position = UDim2.new(0,0,0,y+30)
-    back.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    back.Size = UDim2.new(1,0,0,10)
+    back.Position = UDim2.new(0,0,0,y+25)
+    back.BackgroundColor3 = Color3.fromRGB(60,60,60)
     back.Parent = parent
-    local backCorner = Instance.new("UICorner")
-    backCorner.CornerRadius = UDim.new(0,4)
-    backCorner.Parent = back
+    Instance.new("UICorner",back).CornerRadius = UDim.new(0,5)
 
-    local btn = Instance.new("TextButton")
+    local btn = Instance.new("Frame")
     btn.Size = UDim2.new(value/max,0,1,0)
-    btn.Position = UDim2.new(0,0,0,0)
     btn.BackgroundColor3 = colorThemes[currentTheme].primary
-    btn.Text = ""
-    btn.BorderSizePixel = 0
     btn.Parent = back
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0,8)
-    btnCorner.Parent = btn
+    Instance.new("UICorner",btn).CornerRadius = UDim.new(0,5)
 
     local dragging = false
-    btn.MouseButton1Down:Connect(function() dragging = true end)
+    back.InputBegan:Connect(function(input)
+        if input.UserInputType==Enum.UserInputType.MouseButton1 then dragging=true end
+    end)
     UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType==Enum.UserInputType.MouseButton1 then dragging=false end
     end)
@@ -142,7 +135,7 @@ local function createSlider(parent,y,text,value,max,callback)
         if dragging then
             local mouseX = UserInputService:GetMouseLocation().X
             local relX = math.clamp(mouseX - back.AbsolutePosition.X,0,back.AbsoluteSize.X)
-            btn.Position = UDim2.new(0,relX,0,0)
+            btn.Size = UDim2.new(relX/back.AbsoluteSize.X,0,1,0)
             value = math.floor((relX/back.AbsoluteSize.X)*max)
             lbl.Text = text.." "..value
             callback(value)
@@ -157,13 +150,11 @@ local function createToggle(parent,y,text,default,callback)
     btn.Position = UDim2.new(0,0,0,y)
     btn.BackgroundColor3 = default and colorThemes[currentTheme].primary or Color3.fromRGB(80,80,80)
     btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Font = Enum.Font.SourceSansBold
+    btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.Text = text..": "..(default and "ON" or "OFF")
     btn.Parent = parent
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0,8)
-    corner.Parent = btn
+    Instance.new("UICorner",btn).CornerRadius = UDim.new(0,8)
 
     local state = default
     btn.MouseButton1Click:Connect(function()
@@ -175,7 +166,7 @@ local function createToggle(parent,y,text,default,callback)
 end
 
 -- MAIN SLIDERS
-createSlider(mainContent,0,"Magnet Range",magnetRange,100,function(v) magnetRange=v end)
+createSlider(mainContent,0,"Magnet Range",magnetRange,200,function(v) magnetRange=v end)
 createSlider(mainContent,60,"WalkSpeed",walkSpeed,100,function(v)
     walkSpeed=v
     if lp.Character and lp.Character:FindFirstChild("Humanoid") then
@@ -192,16 +183,14 @@ createToggle(mainContent,260,"Magnet",magnetEnabled,function(state) magnetEnable
 -- REJOIN BUTTON
 local rejoinBtn = Instance.new("TextButton")
 rejoinBtn.Size = UDim2.new(1,0,0,30)
-rejoinBtn.Position = UDim2.new(0,0,0,300)
+rejoinBtn.Position = UDim2.new(0,0,0,310)
 rejoinBtn.BackgroundColor3=colorThemes[currentTheme].primary
 rejoinBtn.TextColor3=Color3.fromRGB(255,255,255)
-rejoinBtn.Font=Enum.Font.SourceSansBold
+rejoinBtn.Font=Enum.Font.GothamBold
 rejoinBtn.TextSize=14
 rejoinBtn.Text="Rejoin"
 rejoinBtn.Parent=mainContent
-local corner = Instance.new("UICorner")
-corner.CornerRadius=UDim.new(0,8)
-corner.Parent=rejoinBtn
+Instance.new("UICorner",rejoinBtn).CornerRadius=UDim.new(0,8)
 rejoinBtn.MouseButton1Click:Connect(function()
     game:GetService("TeleportService"):Teleport(game.PlaceId, lp)
 end)
@@ -211,12 +200,12 @@ mainTab.MouseButton1Click:Connect(function()
     mainContent.Visible=true
     miscContent.Visible=false
     mainTab.BackgroundColor3=colorThemes[currentTheme].primary
-    miscTab.BackgroundColor3=Color3.fromRGB(60,60,60)
+    miscTab.BackgroundColor3=Color3.fromRGB(70,70,70)
 end)
 miscTab.MouseButton1Click:Connect(function()
     mainContent.Visible=false
     miscContent.Visible=true
-    mainTab.BackgroundColor3=Color3.fromRGB(60,60,60)
+    mainTab.BackgroundColor3=Color3.fromRGB(70,70,70)
     miscTab.BackgroundColor3=colorThemes[currentTheme].primary
 end)
 
@@ -237,28 +226,6 @@ title.InputChanged:Connect(function(input)
 end)
 title.InputEnded:Connect(function(input)
     if input.UserInputType==Enum.UserInputType.MouseButton1 then dragStart=nil end
-end)
-
--- MAGNET & PULL VECTOR
-UserInputService.InputBegan:Connect(function(input,processed)
-    if processed then return end
-    if input.UserInputType==Enum.UserInputType.MouseButton1 then
-        local char = lp.Character
-        if not char then return end
-        local hand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm") or char:FindFirstChild("HumanoidRootPart")
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hand or not hrp then return end
-        for _,obj in ipairs(workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and obj.Name:lower():match(ballName:lower()) then
-                local dist = (obj.Position-hrp.Position).Magnitude
-                if magnetEnabled and dist<=magnetRange then
-                    obj.CFrame=CFrame.new(hand.Position)
-                elseif pullVectorEnabled and dist<=magnetRange then
-                    TweenService:Create(obj,TweenInfo.new(pullVectorStrength,Enum.EasingStyle.Linear),{CFrame=CFrame.new(hand.Position)}):Play()
-                end
-            end
-        end
-    end
 end)
 
 -- FORCEFIELD
@@ -303,5 +270,4 @@ end
 lp.Backpack.ChildAdded:Connect(setupTool)
 lp.CharacterAdded:Connect(function(char) char.ChildAdded:Connect(setupTool) end)
 if lp.Character then lp.Character.ChildAdded:Connect(setupTool) end
-
 ]])()
