@@ -9,6 +9,10 @@ local TeleportService = game:GetService("TeleportService")
 local lp = Players.LocalPlayer
 local playerGui = lp:WaitForChild("PlayerGui")
 
+-- Prevent multiple copies
+if _G.VentusRunning then return end
+_G.VentusRunning = true
+
 -- SETTINGS
 local ballName = "Football"
 local magnetRange = 35
