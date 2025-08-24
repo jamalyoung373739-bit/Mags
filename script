@@ -60,7 +60,7 @@ end
 -- AUTO-TUCK
 local function setupTool(tool)
     if tool:IsA("Tool") and tool.Name==ballName and autoTuckEnabled then
-        task.wait(0.1)
+        task.wait(0.05)
         VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
         VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
     end
