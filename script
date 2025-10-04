@@ -14,6 +14,8 @@ local defaultWalkSpeed = 16
 local defaultJumpPower = 50
 local walkSpeed = defaultWalkSpeed
 local jumpPower = defaultJumpPower
+local lastWalkSpeed = walkSpeed
+local lastJumpPower = jumpPower
 local autoTuckEnabled = false
 local autoTuckDelay = 50
 local ballName = "Football"
@@ -74,30 +76,40 @@ local function createSlider(parent, y, text, initial, maxValue, callback)
     sliderFills[text] = fill
     sliderMax[text] = maxValue
 
-    local localDragging = false
+    local function updateSlider(inputX)
+        local relX = math.clamp(inputX - back.AbsolutePosition.X, 0, back.AbsoluteSize.X)
+        local value = math.floor((relX / back.AbsoluteSize.X) * maxValue)
+        value = math.clamp(value, 0, maxValue)
+        fill.Size = UDim2.new(relX / back.AbsoluteSize.X, 0, 1, 0)
+        lbl.Text = text .. " " .. value
+        pcall(callback, value)
+    end
+
+    -- click to set
     back.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            localDragging = true
-            suppressDrag = true
+            updateSlider(UserInputService:GetMouseLocation().X)
         end
     end)
-    back.InputEnded:Connect(function(input)
+
+    -- drag to slide
+    local dragging = false
+    back.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            localDragging = false
-            suppressDrag = false
+            dragging = true
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
         end
     end)
     RunService.RenderStepped:Connect(function()
-        if localDragging then
-            local mouseX = UserInputService:GetMouseLocation().X
-            local relX = math.clamp(mouseX - back.AbsolutePosition.X, 0, back.AbsoluteSize.X)
-            fill.Size = UDim2.new(relX / back.AbsoluteSize.X, 0, 1, 0)
-            local value = math.floor((relX / back.AbsoluteSize.X) * maxValue)
-            value = math.clamp(value, 0, maxValue)
-            lbl.Text = text .. " " .. value
-            pcall(callback, value)
+        if dragging then
+            updateSlider(UserInputService:GetMouseLocation().X)
         end
     end)
+
     return function(newVal)
         newVal = math.clamp(newVal, 0, maxValue)
         lbl.Text = text .. " " .. newVal
@@ -142,16 +154,18 @@ local function createButton(parent, y, text, callback)
     btn.MouseButton1Click:Connect(callback)
 end
 
--- Create sliders and toggle
-local setWalkVisual = createSlider(frame, 50, "WalkSpeed", walkSpeed, 200, function(v) walkSpeed = v end)
-local setJumpVisual = createSlider(frame, 100, "JumpPower", jumpPower, 300, function(v) jumpPower = v end)
+-- Sliders & toggles
+local setWalkVisual = createSlider(frame, 50, "WalkSpeed", walkSpeed, 200, function(v) walkSpeed = v lastWalkSpeed = v end)
+local setJumpVisual = createSlider(frame, 100, "JumpPower", jumpPower, 200, function(v) jumpPower = v lastJumpPower = v end)
 local autoBtn = createToggle(frame, 150, "Auto Tuck", autoTuckEnabled, function(s) autoTuckEnabled = s end)
 local setTuckVisual = createSlider(frame, 200, "Tuck Delay (ms)", autoTuckDelay, 1000, function(v) autoTuckDelay = v end)
 
--- Reset button
+-- Reset defaults
 createButton(frame, 250, "Reset Defaults", function()
-    walkSpeed = 16
-    jumpPower = 50
+    walkSpeed = defaultWalkSpeed
+    jumpPower = defaultJumpPower
+    lastWalkSpeed = walkSpeed
+    lastJumpPower = jumpPower
     autoTuckEnabled = false
     autoTuckDelay = 50
     setWalkVisual(walkSpeed)
@@ -198,44 +212,47 @@ UserInputService.InputBegan:Connect(function(input, processed)
     end
 end)
 
--- Enforce WalkSpeed & JumpPower
+-- Enforce WalkSpeed & JumpPower only when changed
 RunService.Heartbeat:Connect(function()
     local char = lp.Character
     if char then
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then
             hum.UseJumpPower = true
-            hum.WalkSpeed = walkSpeed
-            hum.JumpPower = jumpPower
+            if hum.WalkSpeed ~= lastWalkSpeed then
+                hum.WalkSpeed = lastWalkSpeed
+            end
+            if hum.JumpPower ~= lastJumpPower then
+                hum.JumpPower = lastJumpPower
+            end
         end
     end
 end)
 
--- Auto-Tuck (reliable)
+lp.CharacterAdded:Connect(function(char)
+    local hum = char:WaitForChild("Humanoid")
+    hum.UseJumpPower = true
+    hum.WalkSpeed = lastWalkSpeed
+    hum.JumpPower = lastJumpPower
+end)
+
+-- Auto-Tuck
 local function setupTool(tool)
     if not tool:IsA("Tool") or tool.Name ~= ballName then return end
     if not autoTuckEnabled then return end
-
-    -- Wait until equipped
     if tool:FindFirstChild("Equipped") then
         tool.Equipped:Wait()
     else
         task.wait(0.1)
     end
-
-    -- Wait extra for animation start
     task.wait(autoTuckDelay / 1000)
-
-    -- Press E
     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
 end
 
--- Connect tools on spawn
 local function connectCharacterTools(character)
     character.ChildAdded:Connect(setupTool)
 end
-
 if lp.Character then connectCharacterTools(lp.Character) end
 lp.CharacterAdded:Connect(connectCharacterTools)
 ]])()
