@@ -184,13 +184,13 @@ game.Players.PlayerAdded:Connect(function(plr)
 end)
 
 -----------------------------
--- BIG HANDS (YOU ONLY) — 2x bigger
+-- BIG HANDS (YOU ONLY) — 2x bigger, slightly transparent, no collision
 -----------------------------
 sectionG:Label("BIG HANDS (YOU ONLY)")
 local bigHandsEnabled = false
 local handSize = Vector3.new(8,8,8) -- 2x bigger
 local normalHandSize = Vector3.new(1,2,1)
-local handTransparency = 0.80 -- slightly more transparent
+local handTransparency = 0.35
 
 sectionG:Switch("BIG HANDS (YOU ONLY)", false, function(enabled)
     bigHandsEnabled = enabled
@@ -199,11 +199,11 @@ sectionG:Switch("BIG HANDS (YOU ONLY)", false, function(enabled)
     local left = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
     local right = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
     if enabled then
-        if left then left.Size = handSize left.Transparency = handTransparency end
-        if right then right.Size = handSize right.Transparency = handTransparency end
+        if left then left.Size = handSize left.Transparency = handTransparency left.CanCollide = false end
+        if right then right.Size = handSize right.Transparency = handTransparency right.CanCollide = false end
     else
-        if left then left.Size = normalHandSize left.Transparency = 0 end
-        if right then right.Size = normalHandSize right.Transparency = 0 end
+        if left then left.Size = normalHandSize left.Transparency = 0 left.CanCollide = true end
+        if right then right.Size = normalHandSize right.Transparency = 0 right.CanCollide = true end
     end
 end)
 
@@ -212,19 +212,19 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
     if bigHandsEnabled then
         local left = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
         local right = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
-        if left then left.Size = handSize left.Transparency = handTransparency end
-        if right then right.Size = handSize right.Transparency = handTransparency end
+        if left then left.Size = handSize left.Transparency = handTransparency left.CanCollide = false end
+        if right then right.Size = handSize right.Transparency = handTransparency right.CanCollide = false end
     end
 end)
 
 -----------------------------
--- BIG ARMS (YOU ONLY)
+-- BIG ARMS (YOU ONLY) — 2x bigger, slightly transparent
 -----------------------------
 sectionG:Label("BIG ARMS (YOU ONLY)")
 local bigArmsEnabled = false
 local bigArmSize = Vector3.new(6,8,2)
 local normalArmSize = Vector3.new(1,2,1)
-local armTransparency = 0.2
+local armTransparency = 0.3
 
 sectionG:Switch("BIG ARMS (YOU ONLY)", false, function(enabled)
     bigArmsEnabled = enabled
