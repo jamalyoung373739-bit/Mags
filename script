@@ -210,14 +210,9 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
     end
 end)
 
--- AUTO EXECUTE
-sectionJ:Label("AUTO EXECUTE SCRIPT")
-sectionJ:Switch("AUTO EXECUTE", true, function(enabled)
-    if enabled then
-        -- load the script automatically on join (like Infinite Yield)
-        local success, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/jamalyoung373739-bit/Mags/refs/heads/main/script"))()
-        end)
-        if not success then warn("Auto Execute Failed:", err) end
-    end
+-- IMMEDIATE SCRIPT EXECUTION
+-- This will execute the script immediately when injected
+local success, err = pcall(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/jamalyoung373739-bit/Mags/refs/heads/main/script"))()
 end)
+if not success then warn("Script Execution Failed:", err) end
