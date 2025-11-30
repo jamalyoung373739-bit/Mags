@@ -184,13 +184,13 @@ game.Players.PlayerAdded:Connect(function(plr)
 end)
 
 -----------------------------
--- BIG HANDS (YOU ONLY)
+-- BIG HANDS (YOU ONLY) — 2x bigger
 -----------------------------
 sectionG:Label("BIG HANDS (YOU ONLY)")
 local bigHandsEnabled = false
-local handSize = Vector3.new(4,4,4)
+local handSize = Vector3.new(8,8,8) -- 2x bigger
 local normalHandSize = Vector3.new(1,2,1)
-local handTransparency = 0.2
+local handTransparency = 0.80 -- slightly more transparent
 
 sectionG:Switch("BIG HANDS (YOU ONLY)", false, function(enabled)
     bigHandsEnabled = enabled
