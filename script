@@ -10,8 +10,8 @@ local sectionD = window:Section("TRACK SECTION")
 local sectionF = window:Section("XCAA SECTION")
 local sectionL = window:Section("LEGENDS ON CAMPUS")
 local sectionX = window:Section("NHSFA SECTION")
-window:Divider("GENERAL")
-local sectionG = window:Section("GENERAL SECTION")
+window:Divider("UF")
+local sectionG = window:Section("UF")  -- Changed label here
 local sectionH = window:Section("KICKING SECTION")
 local sectionI = window:Section("CONTROL SECTION")
 local sectionJ = window:Section("SETTINGS")
@@ -34,11 +34,7 @@ end)
 
 sectionA:Label("TUCK")
 sectionA:Switch('VISIBLE HITBOX', false, function(vis)
-    if vis then
-        game.Players.LocalPlayer.Character.Hitbox.Transparency = 0.8
-    else
-        game.Players.LocalPlayer.Character.Hitbox.Transparency = 1
-    end
+    game.Players.LocalPlayer.Character.Hitbox.Transparency = vis and 0.8 or 1
 end)
 
 sectionA:Switch("AUTO TUCK", false, function(Tuc)
@@ -98,16 +94,14 @@ sectionB:Switch("Tuck On", false, function(autotuck)
     end)
 end)
 
--- GENERAL SECTION
+-- UF SECTION
 sectionG:Label('UF')
 sectionG:TextField("Speed", "Enter Speed", function(Speed)
-    local Humanoid = game.Players.LocalPlayer.Character.Humanoid
-    Humanoid.WalkSpeed = Speed
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Speed
 end)
 
 sectionG:TextField("Jump Power", "Enter Power", function(Jump)
-    local Humanoid = game.Players.LocalPlayer.Character.Humanoid
-    Humanoid.JumpPower = Jump
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = Jump
 end)
 
 -- PHYSICS
@@ -170,7 +164,7 @@ game.Players.PlayerAdded:Connect(function(plr)
 end)
 
 --------------------------------------------------------------------
--- BIG HANDS + ARMS
+-- BIG HANDS + ARMS (YOU ONLY)
 --------------------------------------------------------------------
 sectionG:Label("BIG HANDS & ARMS (YOU ONLY)")
 local bigHandsEnabled = false
@@ -187,8 +181,8 @@ sectionG:Switch("BIG HANDS", false, function(enabled)
         local leftHand = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
         local rightHand = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
         if enabled then
-            if leftHand then leftHand.Size = handSize leftHand.Transparency = 0.5 end
-            if rightHand then rightHand.Size = handSize rightHand.Transparency = 0.5 end
+            if leftHand then leftHand.Size = handSize leftHand.Transparency = 1 end
+            if rightHand then rightHand.Size = handSize rightHand.Transparency = 1 end
         else
             if leftHand then leftHand.Size = normalHand leftHand.Transparency = 0 end
             if rightHand then rightHand.Size = normalHand rightHand.Transparency = 0 end
@@ -203,11 +197,11 @@ sectionG:Switch("BIG ARMS", false, function(enabled)
         local left = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
         local right = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
         if enabled then
-            if left then left.Size = armSize end
-            if right then right.Size = armSize end
+            if left then left.Size = armSize left.Transparency = 1 end
+            if right then right.Size = armSize right.Transparency = 1 end
         else
-            if left then left.Size = normalArm end
-            if right then right.Size = normalArm end
+            if left then left.Size = normalArm left.Transparency = 0 end
+            if right then right.Size = normalArm right.Transparency = 0 end
         end
     end
 end)
@@ -217,14 +211,14 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
     if bigHandsEnabled then
         local left = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
         local right = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
-        if left then left.Size = handSize left.Transparency = 0.5 end
-        if right then right.Size = handSize right.Transparency = 0.5 end
+        if left then left.Size = handSize left.Transparency = 1 end
+        if right then right.Size = handSize right.Transparency = 1 end
     end
     if bigArmsEnabled then
         local left = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
         local right = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
-        if left then left.Size = armSize end
-        if right then right.Size = armSize end
+        if left then left.Size = armSize left.Transparency = 1 end
+        if right then right.Size = armSize right.Transparency = 1 end
     end
 end)
 
