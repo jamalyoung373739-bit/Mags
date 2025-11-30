@@ -1,8 +1,8 @@
 -- Kyng's UF Premium Script
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/jamalyoung373739-bit/Mags/refs/heads/main/script"))()
+local library = loadstring(game:HttpGet("https://github.com/GoHamza/AppleLibrary/blob/main/main.lua?raw=true"))()
 local window = library:init("Kyng's UF Premium", true, Enum.KeyCode.RightShift, true)
 
--- [DONT TOUCH / STARTUP]
+-- Sections
 window:Divider("ROBLOX FOOTBALL")
 local sectionA = window:Section("RCFA SECTION")
 local sectionB = window:Section("HSFL SECTION")
@@ -12,12 +12,14 @@ local sectionF = window:Section("XCAA SECTION")
 local sectionL = window:Section("LEGENDS ON CAMPUS")
 local sectionX = window:Section("NHSFA SECTION")
 window:Divider("UF")
-local sectionG = window:Section("UF")
+local sectionG = window:Section("UF") -- renamed from General
 local sectionH = window:Section("KICKING SECTION")
 local sectionI = window:Section("CONTROL SECTION")
 local sectionJ = window:Section("SETTINGS")
 
+-----------------------------
 -- RCFA
+-----------------------------
 sectionA:Label("BYPASS")
 sectionA:Button("MUST CLICK", function()
     game.Players.LocalPlayer.Character.Hitbox.LocalAntiCheat.Disabled = true
@@ -35,10 +37,11 @@ end)
 
 sectionA:Label("TUCK")
 sectionA:Switch('VISIBLE HITBOX', false, function(vis)
+    local hb = game.Players.LocalPlayer.Character.Hitbox
     if vis then
-        game.Players.LocalPlayer.Character.Hitbox.Transparency = 0.8
+        hb.Transparency = 0.8
     else
-        game.Players.LocalPlayer.Character.Hitbox.Transparency = 1
+        hb.Transparency = 1
     end
 end)
 
@@ -46,16 +49,16 @@ sectionA:Switch("AUTO TUCK", false, function(Tuc)
     local player = game.Players.LocalPlayer.Character
     player.ChildAdded:Connect(function(Tuc)
         if Tuc.Name == "Football" then
-            wait(0.1)
-            local args = {
-                [1] = { [1] = "Tuck" }
-            }
+            task.wait(0.1)
+            local args = {[1] = {[1] = "Tuck"}} 
             game:GetService("Players").LocalPlayer.Character.Football.Handle.RemoteEvent:FireServer(unpack(args))
         end
     end)
 end)
 
+-----------------------------
 -- OL/DL ENHANCED BLOCKING
+-----------------------------
 sectionC:Label("ENHANCED BLOCKING")
 sectionC:Switch("ADVANCED", false, function(AdvancedBlocking)
     for _, player in pairs(game:GetService("Players"):GetPlayers()) do
@@ -69,27 +72,27 @@ sectionC:Switch("ADVANCED", false, function(AdvancedBlocking)
     end
 end)
 
+-----------------------------
 -- Legend On Campus
+-----------------------------
 sectionL:Label("BYPASS")
 sectionL:Button("MUST CLICK", function()
    game.Players.LocalPlayer.Character:FindFirstChild("Anticheat").Disabled = true
 end)
-sectionL:Label("MAGNET")
-sectionL:Switch("VISIBLE HITBOX", false, function(reach)
-    game.Players.LocalPlayer.Character.Jersey.Transparency = reach and 0.8 or 1
-end)
-sectionL:TextField("RANGE", "Enter Magnet Range", function(LOC)
-    game.Players.LocalPlayer.Character.Jersey.Size = Vector3.new(LOC+3,LOC+5,LOC+3)
-end)
 
+-----------------------------
 -- HSFL
+-----------------------------
 sectionB:Label("MAGNET")
 sectionB:Switch("VISIBLE HITBOX", false, function(reach)
-    game.Players.LocalPlayer.Character.Jersey.Transparency = reach and 0.8 or 1
+    local jersey = game.Players.LocalPlayer.Character.Jersey
+    jersey.Transparency = reach and 0.8 or 1
 end)
+
 sectionB:TextField("RANGE", "Enter Magnet Range", function(hsfl3)
     game.Players.LocalPlayer.Character.Jersey.Size = Vector3.new(hsfl3+3,hsfl3+5,hsfl3+3)
 end)
+
 sectionB:Label("TUCK")
 sectionB:Switch("Tuck On", false, function(autotuck)
     local player = game.Players.LocalPlayer.Character
@@ -101,26 +104,28 @@ sectionB:Switch("Tuck On", false, function(autotuck)
     end)
 end)
 
--- GENERAL SECTION UF
+-----------------------------
+-- UF SECTION (General)
+-----------------------------
 sectionG:Label('GENERAL')
 sectionG:TextField("Speed", "Enter Speed", function(Speed)
-    local Humanoid = game.Players.LocalPlayer.Character.Humanoid
-    Humanoid.WalkSpeed = Speed
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Speed
 end)
 
 sectionG:TextField("Jump Power", "Enter Power", function(Jump)
-    local Humanoid = game.Players.LocalPlayer.Character.Humanoid
-    Humanoid.JumpPower = Jump
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = Jump
 end)
 
 sectionG:Label('PHYSICS')
 sectionG:Switch("ANTI KNOCKBACK", false, function(antiknock)
-    local a = game.Players.LocalPlayer.Character
-    a["Left Arm"].Size = antiknock and Vector3.new(20,2,2) or Vector3.new(1,2,1)
-    a["Right Arm"].Size = antiknock and Vector3.new(20,2,2) or Vector3.new(1,2,1)
+    local char = game.Players.LocalPlayer.Character
+    char["Left Arm"].Size = antiknock and Vector3.new(20,2,2) or Vector3.new(1,2,1)
+    char["Right Arm"].Size = antiknock and Vector3.new(20,2,2) or Vector3.new(1,2,1)
 end)
 
--- QB Follow
+-----------------------------
+-- QB FOLLOW
+-----------------------------
 sectionG:Button("QB Follow (R)", function()
     local TOOL_NAME = "Football"
     local FOLLOW_DISTANCE = 1
@@ -128,7 +133,7 @@ sectionG:Button("QB Follow (R)", function()
     local isFollowing = false
 
     local function followPlayer()
-        for _, player in pairs(game.Players:GetPlayers()) do
+        for _, player in pairs(game:GetService("Players"):GetPlayers()) do
             local pc = player.Character
             if pc and pc:FindFirstChild(TOOL_NAME) then
                 local torso = pc:FindFirstChild("HumanoidRootPart") or pc:FindFirstChild("Torso")
@@ -150,10 +155,13 @@ sectionG:Button("QB Follow (R)", function()
     end)
 end)
 
--- OTHER PLAYERS BIG HEAD FULL TRANSPARENT
+-----------------------------
+-- OTHER PLAYERS BIG HEAD
+-----------------------------
 sectionG:Label("OTHER PLAYERS BIG HEAD FULL TRANSPARENT")
 local bigHeadEnabled = false
 local headSize = 5
+
 sectionG:Switch("BIG HEAD OTHERS", false, function(enabled)
     bigHeadEnabled = enabled
     for _, plr in pairs(game.Players:GetPlayers()) do
@@ -164,6 +172,7 @@ sectionG:Switch("BIG HEAD OTHERS", false, function(enabled)
         end
     end
 end)
+
 game.Players.PlayerAdded:Connect(function(plr)
     plr.CharacterAdded:Connect(function(char)
         task.wait(0.5)
@@ -174,45 +183,70 @@ game.Players.PlayerAdded:Connect(function(plr)
     end)
 end)
 
--- BIG HANDS & ARMS — SLIGHTLY TRANSPARENT
-sectionG:Label("BIG HANDS & ARMS")
-local bigHandsArmsEnabled = false
+-----------------------------
+-- BIG HANDS (YOU ONLY)
+-----------------------------
+sectionG:Label("BIG HANDS (YOU ONLY)")
+local bigHandsEnabled = false
 local handSize = Vector3.new(4,4,4)
-local armSize = Vector3.new(4,8,2)
 local normalHandSize = Vector3.new(1,2,1)
-local normalArmSize = Vector3.new(1,2,1)
-local slightTransparency = 0.2
+local handTransparency = 0.2
 
-sectionG:Switch("BIG HANDS & ARMS", false, function(enabled)
-    bigHandsArmsEnabled = enabled
+sectionG:Switch("BIG HANDS (YOU ONLY)", false, function(enabled)
+    bigHandsEnabled = enabled
     local char = game.Players.LocalPlayer.Character
     if not char then return end
-
-    local leftArm = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
-    local rightArm = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
-
+    local left = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
+    local right = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
     if enabled then
-        if leftArm then leftArm.Size = armSize leftArm.Transparency = slightTransparency end
-        if rightArm then rightArm.Size = armSize rightArm.Transparency = slightTransparency end
+        if left then left.Size = handSize left.Transparency = handTransparency end
+        if right then right.Size = handSize right.Transparency = handTransparency end
     else
-        if leftArm then leftArm.Size = normalArmSize leftArm.Transparency = 0 end
-        if rightArm then rightArm.Size = normalArmSize rightArm.Transparency = 0 end
+        if left then left.Size = normalHandSize left.Transparency = 0 end
+        if right then right.Size = normalHandSize right.Transparency = 0 end
     end
 end)
 
 game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
     task.wait(0.5)
-    if bigHandsArmsEnabled then
-        local leftArm = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
-        local rightArm = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
-        if leftArm then leftArm.Size = armSize leftArm.Transparency = slightTransparency end
-        if rightArm then rightArm.Size = armSize rightArm.Transparency = slightTransparency end
+    if bigHandsEnabled then
+        local left = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
+        local right = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
+        if left then left.Size = handSize left.Transparency = handTransparency end
+        if right then right.Size = handSize right.Transparency = handTransparency end
     end
 end)
 
--- IMMEDIATE SCRIPT EXECUTION
--- This will execute the script immediately when injected
-local success, err = pcall(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/jamalyoung373739-bit/Mags/refs/heads/main/script"))()
+-----------------------------
+-- BIG ARMS (YOU ONLY)
+-----------------------------
+sectionG:Label("BIG ARMS (YOU ONLY)")
+local bigArmsEnabled = false
+local bigArmSize = Vector3.new(6,8,2)
+local normalArmSize = Vector3.new(1,2,1)
+local armTransparency = 0.2
+
+sectionG:Switch("BIG ARMS (YOU ONLY)", false, function(enabled)
+    bigArmsEnabled = enabled
+    local char = game.Players.LocalPlayer.Character
+    if not char then return end
+    local left = char:FindFirstChild("Left Arm")
+    local right = char:FindFirstChild("Right Arm")
+    if enabled then
+        if left then left.Size = bigArmSize left.Transparency = armTransparency end
+        if right then right.Size = bigArmSize right.Transparency = armTransparency end
+    else
+        if left then left.Size = normalArmSize left.Transparency = 0 end
+        if right then right.Size = normalArmSize right.Transparency = 0 end
+    end
 end)
-if not success then warn("Script Execution Failed:", err) end
+
+game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(0.5)
+    if bigArmsEnabled then
+        local left = char:FindFirstChild("Left Arm")
+        local right = char:FindFirstChild("Right Arm")
+        if left then left.Size = bigArmSize left.Transparency = armTransparency end
+        if right then right.Size = bigArmSize right.Transparency = armTransparency end
+    end
+end)
