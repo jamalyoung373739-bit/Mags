@@ -1,258 +1,247 @@
-loadstring([[
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local lp = Players.LocalPlayer
-local playerGui = lp:WaitForChild("PlayerGui")
+local library = loadstring(game:HttpGet("https://github.com/GoHamza/AppleLibrary/blob/main/main.lua?raw=true"))()
+local window = library:init("Kyng's UF Premium", true, Enum.KeyCode.RightShift, true)
 
-if _G.SheaButterRunning then return end
-_G.SheaButterRunning = true
+-- [STARTER]  
+window:Divider("ROBLOX FOOTBALL")
+local sectionA = window:Section("RCFA SECTION")
+local sectionB = window:Section("HSFL SECTION")
+local sectionC = window:Section("OL/DL SECTION")
+local sectionD = window:Section("TRACK SECTION")
+local sectionF = window:Section("XCAA SECTION")
+local sectionL = window:Section("LEGENDS ON CAMPUS")
+local sectionX = window:Section("NHSFA SECTION")
+window:Divider("GENERAL")
+local sectionG = window:Section("GENERAL SECTION")
+local sectionH = window:Section("KICKING SECTION")
+local sectionI = window:Section("CONTROL SECTION")
+local sectionJ = window:Section("SETTINGS")
 
--- Defaults
-local defaultWalkSpeed = 16
-local defaultJumpPower = 50
-local walkSpeed = defaultWalkSpeed
-local jumpPower = defaultJumpPower
-local lastWalkSpeed = walkSpeed
-local lastJumpPower = jumpPower
-local autoTuckEnabled = false
-local autoTuckDelay = 50
-local ballName = "Football"
-
--- GUI
-if playerGui:FindFirstChild("SheaButterHub") then
-    playerGui.SheaButterHub:Destroy()
-end
-
-local gui = Instance.new("ScreenGui")
-gui.Name = "SheaButterHub"
-gui.ResetOnSpawn = false
-gui.Parent = playerGui
-
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0,400,0,300)
-frame.Position = UDim2.new(0.5,-200,0.5,-150)
-frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-frame.BorderSizePixel = 0
-frame.Parent = gui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
-
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,0,0,40)
-title.BackgroundTransparency = 1
-title.Text = "ksubi JP hub"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 22
-title.TextColor3 = Color3.fromRGB(0,162,255)
-
-local sliderLabels, sliderFills, sliderMax, toggleButtons = {}, {}, {}, {}
-local suppressDrag = false
-
--- Slider creator
-local function createSlider(parent, y, text, initial, maxValue, callback)
-    local lbl = Instance.new("TextLabel", parent)
-    lbl.Size = UDim2.new(1,0,0,20)
-    lbl.Position = UDim2.new(0,0,0,y)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = text .. " " .. initial
-    lbl.TextColor3 = Color3.fromRGB(220,220,220)
-    lbl.Font = Enum.Font.GothamBold
-    lbl.TextSize = 14
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-
-    local back = Instance.new("Frame", parent)
-    back.Size = UDim2.new(1,0,0,12)
-    back.Position = UDim2.new(0,0,0,y+25)
-    back.BackgroundColor3 = Color3.fromRGB(50,50,50)
-    Instance.new("UICorner", back).CornerRadius = UDim.new(0,6)
-
-    local fill = Instance.new("Frame", back)
-    fill.Size = UDim2.new(initial / maxValue, 0, 1, 0)
-    fill.BackgroundColor3 = Color3.fromRGB(0,162,255)
-    Instance.new("UICorner", fill).CornerRadius = UDim.new(0,6)
-
-    sliderLabels[text] = lbl
-    sliderFills[text] = fill
-    sliderMax[text] = maxValue
-
-    local function updateSlider(inputX)
-        local relX = math.clamp(inputX - back.AbsolutePosition.X, 0, back.AbsoluteSize.X)
-        local value = math.floor((relX / back.AbsoluteSize.X) * maxValue)
-        value = math.clamp(value, 0, maxValue)
-        fill.Size = UDim2.new(relX / back.AbsoluteSize.X, 0, 1, 0)
-        lbl.Text = text .. " " .. value
-        pcall(callback, value)
-    end
-
-    -- click to set
-    back.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            updateSlider(UserInputService:GetMouseLocation().X)
-        end
-    end)
-
-    -- drag to slide
-    local dragging = false
-    back.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-    RunService.RenderStepped:Connect(function()
-        if dragging then
-            updateSlider(UserInputService:GetMouseLocation().X)
-        end
-    end)
-
-    return function(newVal)
-        newVal = math.clamp(newVal, 0, maxValue)
-        lbl.Text = text .. " " .. newVal
-        fill.Size = UDim2.new(newVal / maxValue, 0, 1, 0)
-    end
-end
-
--- Toggle creator
-local function createToggle(parent, y, text, initialState, callback)
-    local btn = Instance.new("TextButton", parent)
-    btn.Size = UDim2.new(1,0,0,30)
-    btn.Position = UDim2.new(0,0,0,y)
-    btn.BackgroundColor3 = initialState and Color3.fromRGB(0,162,255) or Color3.fromRGB(60,60,60)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    btn.Text = text .. ": " .. (initialState and "ON" or "OFF")
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
-
-    local state = initialState
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        btn.BackgroundColor3 = state and Color3.fromRGB(0,162,255) or Color3.fromRGB(60,60,60)
-        btn.Text = text .. ": " .. (state and "ON" or "OFF")
-        pcall(callback, state)
-    end)
-    toggleButtons[text] = btn
-    return btn
-end
-
--- Reset button
-local function createButton(parent, y, text, callback)
-    local btn = Instance.new("TextButton", parent)
-    btn.Size = UDim2.new(1,0,0,30)
-    btn.Position = UDim2.new(0,0,0,y)
-    btn.BackgroundColor3 = Color3.fromRGB(0,162,255)
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    btn.Text = text
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
-    btn.MouseButton1Click:Connect(callback)
-end
-
--- Sliders & toggles
-local setWalkVisual = createSlider(frame, 50, "WalkSpeed", walkSpeed, 200, function(v) walkSpeed = v lastWalkSpeed = v end)
-local setJumpVisual = createSlider(frame, 100, "JumpPower", jumpPower, 200, function(v) jumpPower = v lastJumpPower = v end)
-local autoBtn = createToggle(frame, 150, "Auto Tuck", autoTuckEnabled, function(s) autoTuckEnabled = s end)
-local setTuckVisual = createSlider(frame, 200, "Tuck Delay (ms)", autoTuckDelay, 1000, function(v) autoTuckDelay = v end)
-
--- Reset defaults
-createButton(frame, 250, "Reset Defaults", function()
-    walkSpeed = defaultWalkSpeed
-    jumpPower = defaultJumpPower
-    lastWalkSpeed = walkSpeed
-    lastJumpPower = jumpPower
-    autoTuckEnabled = false
-    autoTuckDelay = 50
-    setWalkVisual(walkSpeed)
-    setJumpVisual(jumpPower)
-    setTuckVisual(autoTuckDelay)
-    local btn = toggleButtons["Auto Tuck"]
-    if btn then
-        btn.Text = "Auto Tuck: OFF"
-        btn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-    end
+-- RCFA
+sectionA:Label("BYPASS")
+sectionA:Button("MUST CLICK", function()
+    game.Players.LocalPlayer.Character.Hitbox.LocalAntiCheat.Disabled = true
 end)
 
--- Drag GUI
-local draggingTitle, dragInput, mousePos, framePos = false, nil, nil, nil
-title.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 and not suppressDrag then
-        draggingTitle = true
-        dragInput = input
-        mousePos = input.Position
-        framePos = frame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                draggingTitle = false
-            end
-        end)
-    end
-end)
-title.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and draggingTitle then
-        local delta = input.Position - mousePos
-        frame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
-    end
+sectionA:Label("MAGNET")
+sectionA:TextField("RANGE", "Enter Magnet Range", function(b)
+    game.Players.LocalPlayer.Character.Hitbox.Size = Vector3.new(b+3,b+5,b+3)
 end)
 
--- Toggle GUI with LeftAlt
-UserInputService.InputBegan:Connect(function(input, processed)
-    if not processed and input.KeyCode == Enum.KeyCode.LeftAlt then
-        gui.Enabled = not gui.Enabled
-    end
+sectionA:Label("HBE EXTENDER")
+sectionA:TextField("RANGE", "Enter HBE Range", function(hbe)
+    game.Players.LocalPlayer.Character.Hitbox.Size = Vector3.new(hbe,hbe+2,hbe)
 end)
 
--- Enforce WalkSpeed & JumpPower only when changed
-RunService.Heartbeat:Connect(function()
-    local char = lp.Character
-    if char then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum.UseJumpPower = true
-            if hum.WalkSpeed ~= lastWalkSpeed then
-                hum.WalkSpeed = lastWalkSpeed
-            end
-            if hum.JumpPower ~= lastJumpPower then
-                hum.JumpPower = lastJumpPower
-            end
-        end
-    end
-end)
-
-lp.CharacterAdded:Connect(function(char)
-    local hum = char:WaitForChild("Humanoid")
-    hum.UseJumpPower = true
-    hum.WalkSpeed = lastWalkSpeed
-    hum.JumpPower = lastJumpPower
-end)
-
--- Auto-Tuck
-local function setupTool(tool)
-    if not tool:IsA("Tool") or tool.Name ~= ballName then return end
-    if not autoTuckEnabled then return end
-    if tool:FindFirstChild("Equipped") then
-        tool.Equipped:Wait()
+sectionA:Label("TUCK")
+sectionA:Switch('VISIBLE HITBOX', false, function(vis)
+    if vis then
+        game.Players.LocalPlayer.Character.Hitbox.Transparency = 0.8
     else
-        task.wait(0.1)
+        game.Players.LocalPlayer.Character.Hitbox.Transparency = 1
     end
-    task.wait(autoTuckDelay / 1000)
-    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+end)
+
+sectionA:Switch("AUTO TUCK", false, function(Tuc)
+    local player = game.Players.LocalPlayer.Character
+    player.ChildAdded:Connect(function(Tuc)
+        if Tuc.Name == "Football" then
+            task.wait(0.1)
+            local args = {[1] = {[1] = "Tuck"}} 
+            game:GetService("Players").LocalPlayer.Character.Football.Handle.RemoteEvent:FireServer(unpack(args))
+        end
+    end)
+end)
+
+-- OL/DL ENHANCED BLOCKING
+sectionC:Label("ENHANCED BLOCKING")
+sectionC:Switch("ADVANCED", false, function(AdvancedBlocking)
+    for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+        local character = player.Character
+        if character and character.Name ~= game.Players.LocalPlayer.Name then
+            local jersey = character:FindFirstChild("Jersey") or character:FindFirstChild("Hitbox")
+            if jersey then
+                jersey.Size = AdvancedBlocking and Vector3.new(10,10,10) or Vector3.new(2.31,5.4,2.3)
+            end
+        end
+    end
+end)
+
+-- Legend On Campus
+sectionL:Label("BYPASS")
+sectionL:Button("MUST CLICK", function()
+    game.Players.LocalPlayer.Character:FindFirstChild("Anticheat").Disabled = true
+end)
+sectionL:Label("MAGNET")   
+sectionL:Switch("VISIBLE HITBOX", false, function(reach)
+    game.Players.LocalPlayer.Character.Jersey.Transparency = reach and 0.8 or 1
+end)
+sectionL:TextField("RANGE", "Enter Magnet Range", function(LOC)
+    game.Players.LocalPlayer.Character.Jersey.Size = Vector3.new(LOC+3,LOC+5,LOC+3)
+end)
+
+-- HSFL
+sectionB:Label("MAGNET")   
+sectionB:Switch("VISIBLE HITBOX", false, function(reach)
+    game.Players.LocalPlayer.Character.Jersey.Transparency = reach and 0.8 or 1
+end)
+sectionB:TextField("RANGE", "Enter Magnet Range", function(hsfl3)
+    game.Players.LocalPlayer.Character.Jersey.Size = Vector3.new(hsfl3+3,hsfl3+5,hsfl3+3)
+end)
+sectionB:Label("TUCK")
+sectionB:Switch("Tuck On", false, function(autotuck)
+    local player = game.Players.LocalPlayer.Character
+    player.ChildAdded:Connect(function(TuckOn)
+        if TuckOn.Name == "Football" then
+            local args = {[1] = {[1] = "Tuck"}}
+            game:GetService("Players").LocalPlayer.Character.Jersey.Event:FireServer(unpack(args))
+        end
+    end)
+end)
+
+-- GENERAL SECTION
+sectionG:Label('UF')
+sectionG:TextField("Speed", "Enter Speed", function(Speed)
+    local Humanoid = game.Players.LocalPlayer.Character.Humanoid
+    Humanoid.WalkSpeed = Speed
+end)
+
+sectionG:TextField("Jump Power", "Enter Power", function(Jump)
+    local Humanoid = game.Players.LocalPlayer.Character.Humanoid
+    Humanoid.JumpPower = Jump
+end)
+
+-- PHYSICS
+sectionG:Label('PHYSICS')
+sectionG:Switch("ANTI KNOCKBACK", false, function(antiknock)
+    local a = game.Players.LocalPlayer.Character
+    a["Left Arm"].Size = antiknock and Vector3.new(20,2,2) or Vector3.new(1,2,1)
+    a["Right Arm"].Size = antiknock and Vector3.new(20,2,2) or Vector3.new(1,2,1)
+end)
+
+-- QB Follow
+sectionG:Button("QB Follow (R)", function()
+    local TOOL_NAME = "Football"
+    local FOLLOW_DISTANCE = 1
+    local character = game.Players.LocalPlayer.Character
+    local isFollowing = false
+
+    local function followPlayer()
+        for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+            local pchar = player.Character
+            if pchar and pchar:FindFirstChild(TOOL_NAME) then
+                local torso = pchar:FindFirstChild("HumanoidRootPart") or pchar:FindFirstChild("Torso")
+                if torso then
+                    character:WaitForChild("Humanoid"):MoveTo(torso.Position + torso.CFrame.LookVector * -FOLLOW_DISTANCE, torso)
+                end
+            end
+        end
+    end
+
+    game:GetService("UserInputService").InputBegan:Connect(function(input, gp)
+        if not gp and input.KeyCode == Enum.KeyCode.R then isFollowing = not isFollowing end
+    end)
+    game:GetService("RunService").RenderStepped:Connect(function() if isFollowing then followPlayer() end end)
+end)
+
+-- OTHER PLAYERS BIG HEAD FULL TRANSPARENT
+sectionG:Label("OTHER PLAYERS BIG HEAD FULL TRANSPARENT")
+local bigHeadEnabled = false
+local headSize = 5
+
+sectionG:Switch("BIG HEAD OTHERS", false, function(enabled)
+    bigHeadEnabled = enabled
+    for _, plr in pairs(game.Players:GetPlayers()) do
+        if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+            local head = plr.Character.Head
+            head.Size = enabled and Vector3.new(headSize, headSize, headSize) or Vector3.new(2,2,2)
+            head.Transparency = enabled and 1 or 0
+        end
+    end
+end)
+
+game.Players.PlayerAdded:Connect(function(plr)
+    plr.CharacterAdded:Connect(function(char)
+        task.wait(0.5)
+        if bigHeadEnabled and char:FindFirstChild("Head") then
+            char.Head.Size = Vector3.new(headSize, headSize, headSize)
+            char.Head.Transparency = 1
+        end
+    end)
+end)
+
+--------------------------------------------------------------------
+-- BIG HANDS + ARMS
+--------------------------------------------------------------------
+sectionG:Label("BIG HANDS & ARMS (YOU ONLY)")
+local bigHandsEnabled = false
+local bigArmsEnabled = false
+local handSize = Vector3.new(4,4,4)
+local armSize = Vector3.new(4,2,2)
+local normalHand = Vector3.new(1,2,1)
+local normalArm = Vector3.new(1,2,1)
+
+sectionG:Switch("BIG HANDS", false, function(enabled)
+    bigHandsEnabled = enabled
+    local char = game.Players.LocalPlayer.Character
+    if char then
+        local leftHand = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
+        local rightHand = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
+        if enabled then
+            if leftHand then leftHand.Size = handSize leftHand.Transparency = 0.5 end
+            if rightHand then rightHand.Size = handSize rightHand.Transparency = 0.5 end
+        else
+            if leftHand then leftHand.Size = normalHand leftHand.Transparency = 0 end
+            if rightHand then rightHand.Size = normalHand rightHand.Transparency = 0 end
+        end
+    end
+end)
+
+sectionG:Switch("BIG ARMS", false, function(enabled)
+    bigArmsEnabled = enabled
+    local char = game.Players.LocalPlayer.Character
+    if char then
+        local left = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
+        local right = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
+        if enabled then
+            if left then left.Size = armSize end
+            if right then right.Size = armSize end
+        else
+            if left then left.Size = normalArm end
+            if right then right.Size = normalArm end
+        end
+    end
+end)
+
+game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
+    task.wait(0.5)
+    if bigHandsEnabled then
+        local left = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
+        local right = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
+        if left then left.Size = handSize left.Transparency = 0.5 end
+        if right then right.Size = handSize right.Transparency = 0.5 end
+    end
+    if bigArmsEnabled then
+        local left = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
+        local right = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
+        if left then left.Size = armSize end
+        if right then right.Size = armSize end
+    end
+end)
+
+--------------------------------------------------------------------
+-- AUTO EXECUTE (like Infinite Yield)
+--------------------------------------------------------------------
+if not _G.KyngUFLoaded then
+    _G.KyngUFLoaded = true
+    -- Re-inject script when joining server
+    game:GetService("Players").PlayerAdded:Connect(function(plr)
+        if plr == game.Players.LocalPlayer then
+            task.wait(1)
+            loadstring(game:HttpGet("YOUR_SCRIPT_URL_HERE"))()
+        end
+    end)
 end
 
-local function connectCharacterTools(character)
-    character.ChildAdded:Connect(setupTool)
-end
-if lp.Character then connectCharacterTools(lp.Character) end
-lp.CharacterAdded:Connect(connectCharacterTools)
-]])()
+--------------------------------------------------------------------
+-- SCRIPT READY
+--------------------------------------------------------------------
