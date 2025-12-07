@@ -1,4 +1,4 @@
--- Kyng's UF Premium Script (Modified)
+-- Kyng's UF Premium Script
 local library = loadstring(game:HttpGet("https://github.com/GoHamza/AppleLibrary/blob/main/main.lua?raw=true"))()
 local window = library:init("Kyng's UF Premium", true, Enum.KeyCode.RightShift, true)
 
@@ -184,69 +184,41 @@ game.Players.PlayerAdded:Connect(function(plr)
 end)
 
 -----------------------------
--- BIG HANDS (YOU ONLY)
+-- LONG ARMS ONLY (YOU)
 -----------------------------
-sectionG:Label("BIG HANDS (YOU ONLY)")
-local bigHandsEnabled = false
-local handSize = Vector3.new(4,8,4) -- 2x longer hands
-local normalHandSize = Vector3.new(1,2,1)
-local handTransparency = 0.25
+sectionG:Label("LONG ARMS (YOU ONLY)")
+local longArmsEnabled = false
+local ARM_LENGTH = 16      -- slightly shorter
+local ARM_THICK = 3        -- thicker
+local ARM_TRANSPARENCY = 1
 
-sectionG:Switch("BIG HANDS (YOU ONLY)", false, function(enabled)
-    bigHandsEnabled = enabled
+local function applyLongArms(char)
+    local leftArm = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
+    local rightArm = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
+
+    if leftArm then
+        leftArm.Size = Vector3.new(ARM_THICK, ARM_LENGTH, ARM_THICK)
+        leftArm.Transparency = ARM_TRANSPARENCY
+        leftArm.CanCollide = false
+    end
+    if rightArm then
+        rightArm.Size = Vector3.new(ARM_THICK, ARM_LENGTH, ARM_THICK)
+        rightArm.Transparency = ARM_TRANSPARENCY
+        rightArm.CanCollide = false
+    end
+end
+
+sectionG:Switch("LONG ARMS", false, function(enabled)
+    longArmsEnabled = enabled
     local char = game.Players.LocalPlayer.Character
-    if not char then return end
-    local left = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
-    local right = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
-    if enabled then
-        if left then left.Size = handSize left.Transparency = handTransparency left.CanCollide = false end
-        if right then right.Size = handSize right.Transparency = handTransparency right.CanCollide = false end
-    else
-        if left then left.Size = normalHandSize left.Transparency = 0 left.CanCollide = true end
-        if right then right.Size = normalHandSize right.Transparency = 0 right.CanCollide = true end
+    if char and longArmsEnabled then
+        applyLongArms(char)
     end
 end)
 
 game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
     task.wait(0.5)
-    if bigHandsEnabled then
-        local left = char:FindFirstChild("Left Arm") or char:FindFirstChild("LeftHand")
-        local right = char:FindFirstChild("Right Arm") or char:FindFirstChild("RightHand")
-        if left then left.Size = handSize left.Transparency = handTransparency left.CanCollide = false end
-        if right then right.Size = handSize right.Transparency = handTransparency right.CanCollide = false end
-    end
-end)
-
------------------------------
--- BIG ARMS (YOU ONLY)
------------------------------
-sectionG:Label("BIG ARMS (YOU ONLY)")
-local bigArmsEnabled = false
-local bigArmSize = Vector3.new(6,12,2) -- 2x longer arms
-local normalArmSize = Vector3.new(1,2,1)
-local armTransparency = 0.25
-
-sectionG:Switch("BIG ARMS (YOU ONLY)", false, function(enabled)
-    bigArmsEnabled = enabled
-    local char = game.Players.LocalPlayer.Character
-    if not char then return end
-    local left = char:FindFirstChild("Left Arm")
-    local right = char:FindFirstChild("Right Arm")
-    if enabled then
-        if left then left.Size = bigArmSize left.Transparency = armTransparency left.CanCollide = false end
-        if right then right.Size = bigArmSize right.Transparency = armTransparency right.CanCollide = false end
-    else
-        if left then left.Size = normalArmSize left.Transparency = 0 left.CanCollide = true end
-        if right then right.Size = normalArmSize right.Transparency = 0 right.CanCollide = true end
-    end
-end)
-
-game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
-    task.wait(0.5)
-    if bigArmsEnabled then
-        local left = char:FindFirstChild("Left Arm")
-        local right = char:FindFirstChild("Right Arm")
-        if left then left.Size = bigArmSize left.Transparency = armTransparency left.CanCollide = false end
-        if right then right.Size = bigArmSize right.Transparency = armTransparency right.CanCollide = false end
+    if longArmsEnabled then
+        applyLongArms(char)
     end
 end)
